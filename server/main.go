@@ -7,6 +7,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"chatserver/server/handlers"
+	"chatserver/server/middleware"
 )
 
 func init() {
@@ -18,14 +19,20 @@ func init() {
 
 func main() {
 	// ルーティングの設定
-	http.HandleFunc("/", handlers.HandleHome)
-	http.HandleFunc("/api/health", handlers.HandleHealth)
-	http.HandleFunc("/api/echo", handlers.HandleEcho)
-	http.HandleFunc("/api/assistant", handlers.HandleAssistant)
+	mux := http.NewServeMux()
+
+	// エンドポイントの設定
+	mux.HandleFunc("/", handlers.HandleHome)
+	mux.HandleFunc("/api/health", handlers.HandleHealth)
+	mux.HandleFunc("/api/echo", handlers.HandleEcho)
+	mux.HandleFunc("/api/assistant", handlers.HandleAssistant)
+
+	// CORSミドルウェアの適用
+	handler := middleware.CORSMiddleware(mux)
 
 	// サーバーの起動
 	log.Println("サーバーを起動します: http://localhost:8080")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err := http.ListenAndServe(":8080", handler); err != nil {
 		log.Fatal(err)
 	}
 }
