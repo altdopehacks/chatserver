@@ -1,4 +1,4 @@
-# Chat Server
+# Chat Server and test client
 
 シンプルなGolang APIサーバー
 
