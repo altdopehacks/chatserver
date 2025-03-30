@@ -1,0 +1,11 @@
+# 環境変数
+.env
+
+# その他の一般的な除外ファイル
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+.DS_Store 

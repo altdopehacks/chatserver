@@ -1,51 +1,31 @@
 package main
 
 import (
-	"io"
 	"log"
 	"net/http"
+
+	"github.com/joho/godotenv"
+
+	"chatserver/server/handlers"
 )
+
+func init() {
+	// .envファイルから環境変数を読み込む
+	if err := godotenv.Load(); err != nil {
+		log.Printf("Warning: .envファイルが読み込めません: %v", err)
+	}
+}
 
 func main() {
 	// ルーティングの設定
-	http.HandleFunc("/", handleHome)
-	http.HandleFunc("/api/health", handleHealth)
-	http.HandleFunc("/api/echo", handleEcho)
+	http.HandleFunc("/", handlers.HandleHome)
+	http.HandleFunc("/api/health", handlers.HandleHealth)
+	http.HandleFunc("/api/echo", handlers.HandleEcho)
+	http.HandleFunc("/api/assistant", handlers.HandleAssistant)
 
 	// サーバーの起動
 	log.Println("サーバーを起動します: http://localhost:8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func handleHome(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(`{"message": "Welcome to the API Server"}`))
-}
-
-func handleHealth(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(`{"status": "healthy"}`))
-}
-
-func handleEcho(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// リクエストボディを読み取る
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Failed to read request body", http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
-
-	// レスポンスヘッダーの設定
-	w.Header().Set("Content-Type", "application/json")
-
-	// リクエストボディをそのまま返す
-	w.Write(body)
 }
