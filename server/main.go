@@ -27,8 +27,10 @@ func main() {
 	mux.HandleFunc("/api/echo", handlers.HandleEcho)
 	mux.HandleFunc("/api/assistant", handlers.HandleAssistant)
 
-	// CORSミドルウェアの適用
-	handler := middleware.CORSMiddleware(mux)
+	// ミドルウェアの適用（内側から外側の順に実行される）
+	handler := middleware.LoggingMiddleware(
+		middleware.CORSMiddleware(mux),
+	)
 
 	// サーバーの起動
 	log.Println("サーバーを起動します: http://localhost:8080")
