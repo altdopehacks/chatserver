@@ -79,6 +79,42 @@ func (c *Client) PostEcho(data interface{}) (string, error) {
 	return string(body), nil
 }
 
+// PostAssistant はアシスタントエンドポイントにPOSTリクエストを送信します
+func (c *Client) PostAssistant(message string) (string, error) {
+	data := map[string]string{
+		"message": message,
+	}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return "", fmt.Errorf("JSONエンコードエラー: %v", err)
+	}
+
+	resp, err := c.httpClient.Post(
+		baseURL+"/api/assistant",
+		"application/json",
+		bytes.NewBuffer(jsonData),
+	)
+	if err != nil {
+		return "", fmt.Errorf("リクエストエラー: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("レスポンスの読み取りエラー: %v", err)
+	}
+
+	var response struct {
+		Response string `json:"response"`
+	}
+	if err := json.Unmarshal(body, &response); err != nil {
+		return "", fmt.Errorf("JSONデコードエラー: %v", err)
+	}
+
+	return response.Response, nil
+}
+
 func main() {
 	client := NewClient()
 
@@ -111,5 +147,16 @@ func main() {
 		fmt.Printf("エラー: %v\n", err)
 	} else {
 		fmt.Printf("レスポンス: %s\n", echoResp)
+	}
+
+	// アシスタントエンドポイントのテスト
+	fmt.Println("\nアシスタントエンドポイントのテスト:")
+	testMessage := "Goプログラミングについて教えてください"
+	fmt.Printf("送信するメッセージ: %s\n", testMessage)
+	assistantResp, err := client.PostAssistant(testMessage)
+	if err != nil {
+		fmt.Printf("エラー: %v\n", err)
+	} else {
+		fmt.Printf("レスポンス: %s\n", assistantResp)
 	}
 }
