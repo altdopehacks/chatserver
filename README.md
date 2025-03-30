@@ -36,11 +36,102 @@ cd client
 go run main.go
 ```
 
-## エンドポイント
+## API仕様
 
-- `GET /`: ウェルカムメッセージ
-- `GET /api/health`: ヘルスチェック
-- `POST /api/echo`: リクエストボディをそのままエコーバック
+### エンドポイント一覧
+
+| メソッド | エンドポイント | 説明 |
+|----------|----------------|------|
+| GET | `/` | ウェルカムメッセージ |
+| GET | `/api/health` | ヘルスチェック |
+| POST | `/api/echo` | リクエストボディをそのままエコーバック |
+| POST | `/api/assistant` | Gemini AIを使用した応答生成 |
+
+### 各エンドポイントの詳細
+
+#### GET /
+ウェルカムメッセージを返します。
+
+**レスポンス**
+```json
+{
+    "message": "Welcome to the API Server"
+}
+```
+
+#### GET /api/health
+サーバーの健康状態を返します。
+
+**レスポンス**
+```json
+{
+    "status": "healthy"
+}
+```
+
+#### POST /api/echo
+送信されたリクエストボディをそのまま返します。
+
+**リクエスト**
+```json
+{
+    "message": "Hello, World!"
+}
+```
+
+**レスポンス**
+```json
+{
+    "message": "Hello, World!"
+}
+```
+
+#### POST /api/assistant
+Gemini AIを使用して応答を生成します。
+
+**リクエスト**
+```json
+{
+    "message": "Goプログラミングについて教えてください"
+}
+```
+
+**レスポンス**
+```json
+{
+    "response": "生成された応答テキスト"
+}
+```
+
+### JavaScriptからの呼び出し例
+
+```javascript
+// アシスタントエンドポイントの呼び出し
+async function callAssistant(message) {
+    try {
+        const response = await fetch('http://localhost:8080/api/assistant', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: message
+            })
+        });
+        
+        const data = await response.json();
+        return data.response;
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
+    }
+}
+
+// 使用例
+callAssistant('Goプログラミングについて教えてください')
+    .then(response => console.log(response))
+    .catch(error => console.error(error));
+```
 
 ## 開発
 
@@ -53,5 +144,6 @@ go run main.go
 - `GetHome()`: ホームエンドポイントへのGETリクエスト
 - `GetHealth()`: ヘルスチェックエンドポイントへのGETリクエスト
 - `PostEcho(data interface{})`: エコーエンドポイントへのPOSTリクエスト
+- `PostAssistant(message string)`: アシスタントエンドポイントへのPOSTリクエスト
 
 クライアントは`main()`関数で各エンドポイントのテストを実行します。 
